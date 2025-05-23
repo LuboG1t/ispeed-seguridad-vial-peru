@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -25,8 +26,8 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#e21313',
+					foreground: '#ffffff'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -61,6 +62,12 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				ispeed: {
+					red: '#e21313',
+					black: '#000000',
+					white: '#ffffff',
+					gray: '#f5f5f5'
 				}
 			},
 			borderRadius: {
@@ -84,11 +91,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'voice-pulse': {
+					'0%, 100%': {
+						transform: 'scale(1)',
+						opacity: '0.7'
+					},
+					'50%': {
+						transform: 'scale(1.2)',
+						opacity: '1'
+					}
+				},
+				'road-move': {
+					'0%': {
+						transform: 'translateX(-100%)'
+					},
+					'100%': {
+						transform: 'translateX(100%)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'voice-pulse': 'voice-pulse 1.5s ease-in-out infinite',
+				'road-move': 'road-move 3s linear infinite'
 			}
 		}
 	},
