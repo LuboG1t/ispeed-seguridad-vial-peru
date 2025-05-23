@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,15 +30,15 @@ const ConfigurationPage = () => {
     { id: 2, name: "María García", email: "maria@empresa.com", phone: "987654322", status: "Activo" }
   ]);
 
-  // Lista de destinos
-  const [destinations, setDestinations] = useState([
-    { id: 1, name: "Lima - Arequipa", address: "Terminal Terrestre Arequipa, Av. Andrés Avelino Cáceres" },
-    { id: 2, name: "Lima - Cusco", address: "Terminal Terrestre Cusco, Av. Velasco Astete" }
+  // Lista de ciudades/sucursales
+  const [cities, setCities] = useState([
+    { id: 1, name: "Lima", address: "Terminal Terrestre Lima, Av. Javier Prado Este 1056" },
+    { id: 2, name: "Arequipa", address: "Terminal Terrestre Arequipa, Av. Andrés Avelino Cáceres" }
   ]);
 
   // Formularios para nuevos registros
   const [newDriver, setNewDriver] = useState({ name: "", email: "", phone: "" });
-  const [newDestination, setNewDestination] = useState({ name: "", address: "" });
+  const [newCity, setNewCity] = useState({ name: "", address: "" });
 
   if (!user || user.role !== 'supervisor') {
     navigate('/login');
@@ -79,35 +78,35 @@ const ConfigurationPage = () => {
     });
   };
 
-  const addDestination = () => {
-    if (!newDestination.name || !newDestination.address) {
+  const addCity = () => {
+    if (!newCity.name || !newCity.address) {
       toast({
         title: "Error",
-        description: "Completa todos los campos del destino",
+        description: "Completa todos los campos de la ciudad",
         variant: "destructive",
       });
       return;
     }
 
-    const destination = {
-      id: destinations.length + 1,
-      ...newDestination
+    const city = {
+      id: cities.length + 1,
+      ...newCity
     };
 
-    setDestinations([...destinations, destination]);
-    setNewDestination({ name: "", address: "" });
+    setCities([...cities, city]);
+    setNewCity({ name: "", address: "" });
     
     toast({
-      title: "Destino agregado",
-      description: "El destino ha sido agregado correctamente",
+      title: "Ciudad agregada",
+      description: "La ciudad ha sido agregada correctamente",
     });
   };
 
-  const removeDestination = (id: number) => {
-    setDestinations(destinations.filter(dest => dest.id !== id));
+  const removeCity = (id: number) => {
+    setCities(cities.filter(city => city.id !== id));
     toast({
-      title: "Destino eliminado",
-      description: "El destino ha sido removido de la lista",
+      title: "Ciudad eliminada",
+      description: "La ciudad ha sido removida de la lista",
     });
   };
 
@@ -155,7 +154,7 @@ const ConfigurationPage = () => {
             {[
               { step: 1, title: "Datos Empresa", icon: Users },
               { step: 2, title: "Conductores", icon: Users },
-              { step: 3, title: "Destinos", icon: MapPin }
+              { step: 3, title: "Ciudades", icon: MapPin }
             ].map(({ step, title, icon: Icon }) => (
               <div 
                 key={step}
@@ -349,34 +348,34 @@ const ConfigurationPage = () => {
           </div>
         )}
 
-        {/* Step 3: Destinations */}
+        {/* Step 3: Cities */}
         {activeStep === 3 && (
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-ispeed-black">Agregar Destino</CardTitle>
+                <CardTitle className="text-ispeed-black">Agregar Ciudad</CardTitle>
                 <CardDescription>
-                  Configura las rutas y destinos habilitados
+                  Configura las ciudades donde tu empresa tiene sucursales
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <Label htmlFor="destinationName">Ruta/Destino</Label>
+                    <Label htmlFor="cityName">Ciudad</Label>
                     <Input
-                      id="destinationName"
-                      value={newDestination.name}
-                      onChange={(e) => setNewDestination(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Lima - Arequipa"
+                      id="cityName"
+                      value={newCity.name}
+                      onChange={(e) => setNewCity(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Lima"
                       className="mt-1"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="destinationAddress">Dirección de Sucursal</Label>
+                    <Label htmlFor="cityAddress">Dirección de Sucursal</Label>
                     <Input
-                      id="destinationAddress"
-                      value={newDestination.address}
-                      onChange={(e) => setNewDestination(prev => ({ ...prev, address: e.target.value }))}
+                      id="cityAddress"
+                      value={newCity.address}
+                      onChange={(e) => setNewCity(prev => ({ ...prev, address: e.target.value }))}
                       placeholder="Terminal Terrestre, Av. Principal 123"
                       className="mt-1"
                     />
@@ -384,34 +383,34 @@ const ConfigurationPage = () => {
                 </div>
                 
                 <Button 
-                  onClick={addDestination}
+                  onClick={addCity}
                   className="bg-ispeed-red hover:bg-red-700 text-white"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Agregar Destino
+                  Agregar Ciudad
                 </Button>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-ispeed-black">Destinos Configurados</CardTitle>
+                <CardTitle className="text-ispeed-black">Ciudades Configuradas</CardTitle>
                 <CardDescription>
-                  Rutas habilitadas para tu empresa
+                  Ciudades donde tu empresa tiene sucursales habilitadas
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {destinations.map((destination) => (
-                    <div key={destination.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  {cities.map((city) => (
+                    <div key={city.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
-                        <h3 className="font-semibold text-ispeed-black">{destination.name}</h3>
-                        <p className="text-sm text-gray-600">{destination.address}</p>
+                        <h3 className="font-semibold text-ispeed-black">{city.name}</h3>
+                        <p className="text-sm text-gray-600">{city.address}</p>
                       </div>
                       <Button 
                         variant="outline"
                         size="sm"
-                        onClick={() => removeDestination(destination.id)}
+                        onClick={() => removeCity(city.id)}
                         className="text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="w-4 h-4" />

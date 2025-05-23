@@ -13,7 +13,8 @@ const TripPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [tripStarted, setTripStarted] = useState(false);
-  const [destination, setDestination] = useState("");
+  const [originCity, setOriginCity] = useState("");
+  const [destinationCity, setDestinationCity] = useState("");
   const [currentTime] = useState(new Date().toLocaleString('es-PE'));
   const [isAlertActive, setIsAlertActive] = useState(false);
   const [tripData, setTripData] = useState({
@@ -22,14 +23,14 @@ const TripPage = () => {
     duration: 0
   });
 
-  const destinations = [
-    "Lima - Arequipa",
-    "Lima - Cusco", 
-    "Lima - Trujillo",
-    "Lima - Piura",
-    "Lima - Huancayo",
-    "Arequipa - Cusco",
-    "Cusco - Puno"
+  const cities = [
+    "Lima",
+    "Arequipa", 
+    "Cusco",
+    "Trujillo",
+    "Piura",
+    "Huancayo",
+    "Puno"
   ];
 
   useEffect(() => {
@@ -71,7 +72,7 @@ const TripPage = () => {
   }
 
   const startTrip = () => {
-    if (!destination) return;
+    if (!originCity || !destinationCity) return;
     setTripStarted(true);
   };
 
@@ -102,17 +103,35 @@ const TripPage = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <Label htmlFor="destination" className="text-ispeed-black font-medium">
-                Destino
+              <Label htmlFor="origin" className="text-ispeed-black font-medium">
+                Ciudad Origen
               </Label>
-              <Select value={destination} onValueChange={setDestination}>
+              <Select value={originCity} onValueChange={setOriginCity}>
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Selecciona tu destino" />
+                  <SelectValue placeholder="Selecciona ciudad de origen" />
                 </SelectTrigger>
                 <SelectContent>
-                  {destinations.map((dest) => (
-                    <SelectItem key={dest} value={dest}>
-                      {dest}
+                  {cities.map((city) => (
+                    <SelectItem key={city} value={city}>
+                      {city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="destination" className="text-ispeed-black font-medium">
+                Ciudad Destino
+              </Label>
+              <Select value={destinationCity} onValueChange={setDestinationCity}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Selecciona ciudad de destino" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cities.filter(city => city !== originCity).map((city) => (
+                    <SelectItem key={city} value={city}>
+                      {city}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -141,7 +160,7 @@ const TripPage = () => {
               </Button>
               <Button 
                 onClick={startTrip}
-                disabled={!destination}
+                disabled={!originCity || !destinationCity}
                 className="flex-1 bg-ispeed-red hover:bg-red-700 text-white"
               >
                 Comenzar Viaje
@@ -160,7 +179,7 @@ const TripPage = () => {
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div>
             <h1 className="text-xl font-bold">Viaje en Curso</h1>
-            <p className="text-gray-300">{destination}</p>
+            <p className="text-gray-300">{originCity} → {destinationCity}</p>
           </div>
           <div className="text-right">
             <div className="text-2xl font-mono">{formatTime(tripData.duration)}</div>
