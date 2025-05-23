@@ -157,7 +157,7 @@ const ReportsPage = () => {
                       <SelectValue placeholder="Todos" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos</SelectItem>
+                      <SelectItem value="all">Todos</SelectItem>
                       {drivers.map((driver) => (
                         <SelectItem key={driver} value={driver}>
                           {driver}
@@ -175,7 +175,7 @@ const ReportsPage = () => {
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
                     {destinations.map((destination) => (
                       <SelectItem key={destination} value={destination}>
                         {destination}
