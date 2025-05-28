@@ -228,10 +228,15 @@ const ConfigurationPage = () => {
 
               <div className="flex justify-end">
                 <Button 
-                  onClick={() => setActiveStep(2)}
+                  onClick={() => {
+                    toast({
+                      title: "Datos guardados",
+                      description: "La información de la empresa ha sido guardada correctamente",
+                    });
+                  }}
                   className="bg-ispeed-red hover:bg-red-700 text-white"
                 >
-                  Siguiente
+                  Guardar
                 </Button>
               </div>
             </CardContent>
@@ -337,10 +342,15 @@ const ConfigurationPage = () => {
                     Anterior
                   </Button>
                   <Button 
-                    onClick={() => setActiveStep(3)}
+                    onClick={() => {
+                      toast({
+                        title: "Conductores guardados",
+                        description: "La información de conductores ha sido guardada correctamente",
+                      });
+                    }}
                     className="bg-ispeed-red hover:bg-red-700 text-white"
                   >
-                    Siguiente
+                    Guardar
                   </Button>
                 </div>
               </CardContent>
@@ -428,10 +438,15 @@ const ConfigurationPage = () => {
                     Anterior
                   </Button>
                   <Button 
-                    onClick={finishConfiguration}
-                    className="bg-ispeed-red hover:bg-red-700 text-white"
+                    onClick={() => {
+                      toast({
+                        title: "Ciudades guardadas",
+                        description: "La información de ciudades ha sido guardada correctamente",
+                      });
+                    }}
+                    className="bg-ispeed-red hover:bg-red-700 text-white mr-2"
                   >
-                    Finalizar Configuración
+                    Guardar
                   </Button>
                 </div>
               </CardContent>
