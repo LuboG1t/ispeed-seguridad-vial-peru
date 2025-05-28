@@ -1,19 +1,19 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { Eye, EyeOff, ShieldCheck, Truck } from "lucide-react";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"supervisor" | "driver">("supervisor");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -63,62 +63,100 @@ const LoginPage = () => {
           </p>
         </div>
 
-        <Card className="border-2 border-gray-100">
+        <Card className="border-2 border-gray-100 shadow-md">
           <CardHeader>
             <CardTitle className="text-center text-ispeed-black">Bienvenido</CardTitle>
             <CardDescription className="text-center">
-              Selecciona tu tipo de usuario
+              Selecciona tu tipo de usuario e ingresa tus credenciales
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <Label className="text-ispeed-black font-medium">Tipo de Usuario</Label>
-                <RadioGroup value={role} onValueChange={(value) => setRole(value as "supervisor" | "driver")} className="mt-2">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="supervisor" id="supervisor" />
-                    <Label htmlFor="supervisor">Supervisor de Empresa</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="driver" id="driver" />
-                    <Label htmlFor="driver">Conductor</Label>
-                  </div>
-                </RadioGroup>
+            {/* Barra para seleccionar tipo de usuario */}
+            <div className="mb-6">
+              <div className="bg-gray-100 p-1 rounded-lg flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => setRole("supervisor")}
+                  className={`flex items-center justify-center w-1/2 py-2 px-4 rounded-md transition-all ${
+                    role === "supervisor"
+                      ? "bg-ispeed-red text-white shadow-md"
+                      : "bg-transparent text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  Supervisor
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole("driver")}
+                  className={`flex items-center justify-center w-1/2 py-2 px-4 rounded-md transition-all ${
+                    role === "driver"
+                      ? "bg-ispeed-red text-white shadow-md"
+                      : "bg-transparent text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  <Truck className="mr-2 h-4 w-4" />
+                  Conductor
+                </button>
               </div>
+            </div>
 
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Label htmlFor="email" className="text-ispeed-black font-medium">
                   Correo Electrónico
                 </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tu@correo.com"
-                  required
-                  className="mt-1"
-                />
+                <div className="relative">
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tu@correo.com"
+                    required
+                    className="mt-1 pl-10"
+                  />
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div>
                 <Label htmlFor="password" className="text-ispeed-black font-medium">
                   Contraseña
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="mt-1"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className="mt-1 pl-10"
+                  />
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full bg-ispeed-red hover:bg-red-700 text-white"
+                className="w-full bg-ispeed-red hover:bg-red-700 text-white py-2 h-11 text-base transition-all hover:shadow-lg"
                 disabled={loading}
               >
                 {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
