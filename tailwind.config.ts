@@ -109,13 +109,42 @@ export default {
 					'100%': {
 						transform: 'translateX(100%)'
 					}
-				}
+				},
+				'bus-move': {
+					'0%': {
+						right: '-100px',
+						opacity: '0'
+					},
+					'5%': {
+						right: '-50px',
+						opacity: '1'
+					},
+					'95%': {
+						right: 'calc(100% - 50px)',
+						opacity: '1'
+					},
+					'100%': {
+						right: 'calc(100% + 100px)',
+						opacity: '0'
+					}
+				},
+				'wheel-spin': {
+					'0%': {
+						transform: 'rotate(0deg)'
+					},
+					'100%': {
+						transform: 'rotate(360deg)'
+					}
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'voice-pulse': 'voice-pulse 1.5s ease-in-out infinite',
-				'road-move': 'road-move 3s linear infinite'
+				'road-move': 'road-move 3s linear infinite',
+				'bus-move': 'bus-move 15s linear infinite',
+				'wheel-spin': 'wheel-spin 3s linear infinite',
+				'road-line-flash': 'road-line-flash 2s ease-in-out infinite'
 			}
 		}
 	},
