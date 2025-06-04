@@ -15,7 +15,6 @@ const TripPage = () => {
   const [tripStarted, setTripStarted] = useState(false);
   const [originCity, setOriginCity] = useState("");
   const [destinationCity, setDestinationCity] = useState("");
-  const [currentTime] = useState(new Date().toLocaleString('es-PE'));
   const [isAlertActive, setIsAlertActive] = useState(false);
   const [tripData, setTripData] = useState({
     alerts: 0,
@@ -136,18 +135,6 @@ const TripPage = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="datetime" className="text-ispeed-black font-medium">
-                Fecha y Hora
-              </Label>
-              <Input
-                id="datetime"
-                value={currentTime}
-                readOnly
-                className="mt-1 bg-gray-50"
-              />
             </div>
 
             <div className="flex space-x-3">
