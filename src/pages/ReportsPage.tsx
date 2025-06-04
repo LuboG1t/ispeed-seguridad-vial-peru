@@ -31,7 +31,6 @@ const ReportsPage = () => {
       duration: "8h 30m",
       alerts: 12,
       responses: 11,
-      score: 85,
       status: "Completado"
     },
     {
@@ -42,7 +41,6 @@ const ReportsPage = () => {
       duration: "10h 15m",
       alerts: 8,
       responses: 8,
-      score: 92,
       status: "Completado"
     },
     {
@@ -53,7 +51,6 @@ const ReportsPage = () => {
       duration: "6h 45m",
       alerts: 15,
       responses: 12,
-      score: 78,
       status: "Completado"
     },
     {
@@ -64,7 +61,6 @@ const ReportsPage = () => {
       duration: "7h 20m",
       alerts: 5,
       responses: 5,
-      score: 95,
       status: "Completado"
     }
   ];
@@ -85,7 +81,7 @@ const ReportsPage = () => {
     <div className="min-h-screen bg-ispeed-gray">
       {/* Header */}
       <header className="bg-white shadow-sm border-b-2 border-ispeed-red">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Button 
@@ -195,10 +191,6 @@ const ReportsPage = () => {
             <h2 className="text-2xl font-bold text-ispeed-black">Resultados</h2>
             <p className="text-gray-600">{reports.length} reportes encontrados</p>
           </div>
-          <Button variant="outline" className="border-ispeed-red text-ispeed-red hover:bg-ispeed-red hover:text-white">
-            <Download className="w-4 h-4 mr-2" />
-            Exportar
-          </Button>
         </div>
 
         {/* Reports Table */}
@@ -216,7 +208,6 @@ const ReportsPage = () => {
                     <th className="text-left p-4 font-semibold text-ispeed-black">Duración</th>
                     <th className="text-left p-4 font-semibold text-ispeed-black">Alertas</th>
                     <th className="text-left p-4 font-semibold text-ispeed-black">Respuesta</th>
-                    <th className="text-left p-4 font-semibold text-ispeed-black">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -234,15 +225,6 @@ const ReportsPage = () => {
                         <span className="text-sm text-gray-500 ml-1">
                           ({getResponseRate(report.alerts, report.responses)}%)
                         </span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="border-ispeed-red text-ispeed-red hover:bg-ispeed-red hover:text-white"
-                        >
-                          Ver Detalle
-                        </Button>
                       </td>
                     </tr>
                   ))}
