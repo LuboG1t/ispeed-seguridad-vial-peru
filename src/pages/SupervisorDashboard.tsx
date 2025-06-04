@@ -1,12 +1,10 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { BarChart3, Users, MapPin, AlertTriangle, TrendingUp, Settings } from "lucide-react";
+import { BarChart3, Users, MapPin, AlertTriangle, Settings } from "lucide-react";
 
 const SupervisorDashboard = () => {
   const navigate = useNavigate();
@@ -19,16 +17,15 @@ const SupervisorDashboard = () => {
     activeTrips: 8,
     totalDestinations: 12,
     weeklyTrips: 156,
-    averageScore: 87,
     alertsThisWeek: 43,
     responseRate: 94
   };
 
   const recentTrips = [
-    { id: 1, driver: "Juan Pérez", destination: "Lima - Arequipa", status: "En curso", score: null },
-    { id: 2, driver: "María García", destination: "Lima - Cusco", status: "Completado", score: 92 },
-    { id: 3, driver: "Carlos López", destination: "Lima - Trujillo", status: "Completado", score: 78 },
-    { id: 4, driver: "Ana Rodríguez", destination: "Arequipa - Cusco", status: "Completado", score: 95 }
+    { id: 1, driver: "Juan Pérez", destination: "Lima - Arequipa", status: "En curso" },
+    { id: 2, driver: "María García", destination: "Lima - Cusco", status: "Completado" },
+    { id: 3, driver: "Carlos López", destination: "Lima - Trujillo", status: "Completado" },
+    { id: 4, driver: "Ana Rodríguez", destination: "Arequipa - Cusco", status: "Completado" }
   ];
 
   if (!user || user.role !== 'supervisor') {
@@ -111,7 +108,7 @@ const SupervisorDashboard = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Main Stats */}
+        {/* Stats principales */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="border-l-4 border-l-ispeed-red">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -137,12 +134,12 @@ const SupervisorDashboard = () => {
 
           <Card className="border-l-4 border-l-green-500">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Puntuación Promedio</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-500" />
+              <CardTitle className="text-sm font-medium text-gray-600">Destinos Activos</CardTitle>
+              <MapPin className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-ispeed-black">{dashboardData.averageScore}</div>
-              <Progress value={dashboardData.averageScore} className="mt-2" />
+              <div className="text-2xl font-bold text-ispeed-black">{dashboardData.totalDestinations}</div>
+              <p className="text-xs text-gray-600">Rutas configuradas</p>
             </CardContent>
           </Card>
 
@@ -158,43 +155,7 @@ const SupervisorDashboard = () => {
           </Card>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card className="border-2 border-ispeed-red hover:bg-ispeed-red hover:text-white transition-colors cursor-pointer">
-            <CardHeader className="text-center">
-              <MapPin className="h-8 w-8 mx-auto mb-2" />
-              <CardTitle>Gestionar Destinos</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-sm opacity-80">{dashboardData.totalDestinations} destinos configurados</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-blue-500 hover:bg-blue-500 hover:text-white transition-colors cursor-pointer">
-            <CardHeader className="text-center">
-              <Users className="h-8 w-8 mx-auto mb-2" />
-              <CardTitle>Gestionar Conductores</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-sm opacity-80">{dashboardData.totalDrivers} conductores registrados</p>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="border-2 border-green-500 hover:bg-green-500 hover:text-white transition-colors cursor-pointer"
-            onClick={() => navigate('/reports')}
-          >
-            <CardHeader className="text-center">
-              <BarChart3 className="h-8 w-8 mx-auto mb-2" />
-              <CardTitle>Ver Reportes</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-sm opacity-80">Análisis detallado de viajes</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Trips */}
+        {/* Viajes recientes */}
         <Card>
           <CardHeader>
             <CardTitle className="text-ispeed-black">Viajes Recientes</CardTitle>
@@ -211,16 +172,6 @@ const SupervisorDashboard = () => {
                     <p className="text-sm text-gray-600">{trip.destination}</p>
                   </div>
                   <div className="flex items-center space-x-3">
-                    {trip.score && (
-                      <Badge 
-                        variant="outline"
-                        className={trip.score >= 85 ? "border-green-500 text-green-700" : 
-                                  trip.score >= 70 ? "border-yellow-500 text-yellow-700" : 
-                                  "border-red-500 text-red-700"}
-                      >
-                        {trip.score} pts
-                      </Badge>
-                    )}
                     <Badge 
                       variant={trip.status === "En curso" ? "default" : "secondary"}
                       className={trip.status === "En curso" ? "bg-ispeed-red" : ""}
