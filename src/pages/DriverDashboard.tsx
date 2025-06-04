@@ -129,15 +129,7 @@ const DriverDashboard = () => {
                     <h3 className="font-semibold text-ispeed-black">{trip.destination}</h3>
                     <p className="text-sm text-gray-600">{trip.date}</p>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <Badge 
-                      variant="outline"
-                      className={trip.score >= 85 ? "border-green-500 text-green-700" : 
-                                trip.score >= 70 ? "border-yellow-500 text-yellow-700" : 
-                                "border-red-500 text-red-700"}
-                    >
-                      {trip.score} pts
-                    </Badge>
+                  <div>
                     <Badge variant="secondary">{trip.status}</Badge>
                   </div>
                 </div>
