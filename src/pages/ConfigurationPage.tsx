@@ -191,8 +191,8 @@ const ConfigurationPage = () => {
                   <Input
                     id="companyName"
                     value={companyData.name}
-                    onChange={(e) => setCompanyData(prev => ({ ...prev, name: e.target.value }))}
-                    className="mt-1"
+                    readOnly
+                    className="mt-1 bg-gray-50 cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -200,8 +200,8 @@ const ConfigurationPage = () => {
                   <Input
                     id="ruc"
                     value={companyData.ruc}
-                    onChange={(e) => setCompanyData(prev => ({ ...prev, ruc: e.target.value }))}
-                    className="mt-1"
+                    readOnly
+                    className="mt-1 bg-gray-50 cursor-not-allowed"
                   />
                 </div>
               </div>
