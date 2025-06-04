@@ -77,12 +77,6 @@ const ReportsPage = () => {
     return null;
   }
 
-  const getScoreColor = (score: number) => {
-    if (score >= 85) return "border-green-500 text-green-700";
-    if (score >= 70) return "border-yellow-500 text-yellow-700";
-    return "border-red-500 text-red-700";
-  };
-
   const getResponseRate = (alerts: number, responses: number) => {
     return Math.round((responses / alerts) * 100);
   };
@@ -222,7 +216,6 @@ const ReportsPage = () => {
                     <th className="text-left p-4 font-semibold text-ispeed-black">Duración</th>
                     <th className="text-left p-4 font-semibold text-ispeed-black">Alertas</th>
                     <th className="text-left p-4 font-semibold text-ispeed-black">Respuesta</th>
-                    <th className="text-left p-4 font-semibold text-ispeed-black">Puntuación</th>
                     <th className="text-left p-4 font-semibold text-ispeed-black">Acciones</th>
                   </tr>
                 </thead>
@@ -242,12 +235,7 @@ const ReportsPage = () => {
                           ({getResponseRate(report.alerts, report.responses)}%)
                         </span>
                       </td>
-                      <td className="p-4">
-                        <Badge variant="outline" className={getScoreColor(report.score)}>
-                          {report.score} pts
-                        </Badge>
-                      </td>
-                      <td className="p-4">
+                      <td className="p-4 text-center">
                         <Button 
                           variant="outline" 
                           size="sm"
