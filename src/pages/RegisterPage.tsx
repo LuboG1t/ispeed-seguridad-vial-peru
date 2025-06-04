@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Bus, CheckCircle2, ChevronLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Bus, ChevronLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -16,8 +16,6 @@ const RegisterPage = () => {
     address: "",
     phone: "",
     email: "",
-    contactName: "",
-    contactPhone: "",
     password: "",
     confirmPassword: ""
   });
@@ -58,12 +56,10 @@ const RegisterPage = () => {
       
       if (!formData.address.trim()) newErrors.address = "La dirección es requerida";
       if (!formData.phone.trim()) newErrors.phone = "El teléfono es requerido";
+    } else if (currentStep === 2) {
       if (!formData.email.trim()) newErrors.email = "El correo electrónico es requerido";
       else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Formato de correo inválido";
-    } else if (currentStep === 2) {
-      if (!formData.contactName.trim()) newErrors.contactName = "El nombre del responsable es requerido";
-      if (!formData.contactPhone.trim()) newErrors.contactPhone = "El teléfono del responsable es requerido";
-    } else if (currentStep === 3) {
+      
       if (!formData.password) newErrors.password = "La contraseña es requerida";
       else if (formData.password.length < 8) newErrors.password = "La contraseña debe tener al menos 8 caracteres";
       
@@ -106,7 +102,7 @@ const RegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateStep(3)) return;
+    if (!validateStep(2)) return;
 
     setLoading(true);
 
@@ -157,10 +153,6 @@ const RegisterPage = () => {
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-ispeed-red text-white' : 'bg-gray-200 text-gray-600'}`}>
               2
             </div>
-            <div className={`w-16 h-1 ${step >= 3 ? 'bg-ispeed-red' : 'bg-gray-200'}`}></div>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step >= 3 ? 'bg-ispeed-red text-white' : 'bg-gray-200 text-gray-600'}`}>
-              3
-            </div>
           </div>
         </div>
 
@@ -168,23 +160,20 @@ const RegisterPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center justify-center text-ispeed-black">
               {step === 1 && <Bus className="mr-2 h-5 w-5 text-ispeed-red" />}
-              {step === 2 && <CheckCircle2 className="mr-2 h-5 w-5 text-ispeed-red" />}
-              {step === 3 && <ShieldCheck className="mr-2 h-5 w-5 text-ispeed-red" />}
+              {step === 2 && <ShieldCheck className="mr-2 h-5 w-5 text-ispeed-red" />}
               {step === 1 && "Datos de la Empresa"}
-              {step === 2 && "Datos del Responsable"}
-              {step === 3 && "Configurar Acceso"}
+              {step === 2 && "Datos de Acceso"}
             </CardTitle>
             <CardDescription className="text-center">
               {step === 1 && "Completa la información para registrar tu empresa"}
-              {step === 2 && "Información de la persona responsable de la cuenta"}
-              {step === 3 && "Crea tus credenciales de acceso seguras"}
+              {step === 2 && "Crea tus credenciales de acceso seguras"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {step === 1 && (
                 <>
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
                     <div>
                       <Label htmlFor="companyName" className="text-ispeed-black font-medium">
                         Nombre de la Empresa *
@@ -220,24 +209,24 @@ const RegisterPage = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="address" className="text-ispeed-black font-medium">
-                      Dirección *
-                    </Label>
-                    <Textarea
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      placeholder="Av. Principal 123, Distrito, Provincia, Departamento"
-                      className={`mt-1 ${errors.address ? 'border-red-500' : ''}`}
-                    />
-                    {errors.address && (
-                      <p className="text-red-500 text-sm mt-1">{errors.address}</p>
-                    )}
-                  </div>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+                    <div>
+                      <Label htmlFor="address" className="text-ispeed-black font-medium">
+                        Dirección *
+                      </Label>
+                      <Input
+                        id="address"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        placeholder="Av. Principal 123, Lima, Perú"
+                        className={`mt-1 ${errors.address ? 'border-red-500' : ''}`}
+                      />
+                      {errors.address && (
+                        <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                      )}
+                    </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="phone" className="text-ispeed-black font-medium">
                         Teléfono de la Empresa *
@@ -254,150 +243,108 @@ const RegisterPage = () => {
                         <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
                       )}
                     </div>
-
-                    <div>
-                      <Label htmlFor="email" className="text-ispeed-black font-medium">
-                        Correo Electrónico *
-                      </Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="contacto@empresa.com"
-                        className={`mt-1 ${errors.email ? 'border-red-500' : ''}`}
-                      />
-                      {errors.email && (
-                        <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                      )}
-                    </div>
                   </div>
                 </>
               )}
 
               {step === 2 && (
                 <div className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="contactName" className="text-ispeed-black font-medium">
-                        Nombre del Responsable *
-                      </Label>
-                      <Input
-                        id="contactName"
-                        name="contactName"
-                        value={formData.contactName}
-                        onChange={handleChange}
-                        placeholder="Juan Pérez"
-                        className={`mt-1 ${errors.contactName ? 'border-red-500' : ''}`}
-                      />
-                      {errors.contactName && (
-                        <p className="text-red-500 text-sm mt-1">{errors.contactName}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="contactPhone" className="text-ispeed-black font-medium">
-                        Teléfono del Responsable *
-                      </Label>
-                      <Input
-                        id="contactPhone"
-                        name="contactPhone"
-                        value={formData.contactPhone}
-                        onChange={handleChange}
-                        placeholder="987654321"
-                        className={`mt-1 ${errors.contactPhone ? 'border-red-500' : ''}`}
-                      />
-                      {errors.contactPhone && (
-                        <p className="text-red-500 text-sm mt-1">{errors.contactPhone}</p>
-                      )}
-                    </div>
+                  <div>
+                    <Label htmlFor="email" className="text-ispeed-black font-medium">
+                      Correo Electrónico *
+                    </Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="contacto@empresa.com"
+                      className={`mt-1 ${errors.email ? 'border-red-500' : ''}`}
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                    )}
                   </div>
-                </div>
-              )}
 
-              {step === 3 && (
-                <div className="space-y-6">
-                  <div className="grid md:grid-cols-1 gap-4">
-                    <div>
-                      <Label htmlFor="password" className="text-ispeed-black font-medium">
-                        Contraseña *
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="password"
-                          name="password"
-                          type={showPassword ? "text" : "password"}
-                          value={formData.password}
-                          onChange={handleChange}
-                          placeholder="••••••••"
-                          className={`mt-1 pr-10 ${errors.password ? 'border-red-500' : ''}`}
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                      {errors.password && (
-                        <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-                      )}
-                      
-                      {formData.password && (
-                        <div className="mt-2">
-                          <div className="flex items-center">
-                            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                              <div 
-                                className={`h-2.5 rounded-full ${
-                                  passwordStrength.strength === 0 ? 'bg-red-500' :
-                                  passwordStrength.strength === 1 ? 'bg-orange-500' :
-                                  passwordStrength.strength === 2 ? 'bg-yellow-500' :
-                                  'bg-green-500'
-                                }`}
-                                style={{ width: `${(passwordStrength.strength + 1) * 20}%` }}
-                              ></div>
-                            </div>
-                            <span className="ml-2 text-sm text-gray-600">{passwordStrength.label}</span>
+                  <div>
+                    <Label htmlFor="password" className="text-ispeed-black font-medium">
+                      Contraseña *
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        className={`mt-1 pr-10 ${errors.password ? 'border-red-500' : ''}`}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                    )}
+                    
+                    {formData.password && (
+                      <div className="mt-2">
+                        <div className="flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div 
+                              className={`h-2.5 rounded-full ${
+                                passwordStrength.strength === 0 ? 'bg-red-500' :
+                                passwordStrength.strength === 1 ? 'bg-orange-500' :
+                                passwordStrength.strength === 2 ? 'bg-yellow-500' :
+                                'bg-green-500'
+                              }`}
+                              style={{ width: `${(passwordStrength.strength + 1) * 20}%` }}
+                            ></div>
                           </div>
-                          <ul className="text-xs text-gray-500 mt-2 space-y-1">
-                            <li className={formData.password.length >= 8 ? 'text-green-500' : ''}>
-                              • Mínimo 8 caracteres
-                            </li>
-                            <li className={/[A-Z]/.test(formData.password) ? 'text-green-500' : ''}>
-                              • Al menos una letra mayúscula
-                            </li>
-                            <li className={/[0-9]/.test(formData.password) ? 'text-green-500' : ''}>
-                              • Al menos un número
-                            </li>
-                            <li className={/[^A-Za-z0-9]/.test(formData.password) ? 'text-green-500' : ''}>
-                              • Al menos un carácter especial
-                            </li>
-                          </ul>
+                          <span className="ml-2 text-sm text-gray-600">{passwordStrength.label}</span>
                         </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="confirmPassword" className="text-ispeed-black font-medium">
-                        Confirmar Contraseña *
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="confirmPassword"
-                          name="confirmPassword"
-                          type={showPassword ? "text" : "password"}
-                          value={formData.confirmPassword}
-                          onChange={handleChange}
-                          placeholder="••••••••"
-                          className={`mt-1 ${errors.confirmPassword ? 'border-red-500' : ''}`}
-                        />
+                        <ul className="text-xs text-gray-500 mt-2 space-y-1">
+                          <li className={formData.password.length >= 8 ? 'text-green-500' : ''}>
+                            • Mínimo 8 caracteres
+                          </li>
+                          <li className={/[A-Z]/.test(formData.password) ? 'text-green-500' : ''}>
+                            • Al menos una letra mayúscula
+                          </li>
+                          <li className={/[0-9]/.test(formData.password) ? 'text-green-500' : ''}>
+                            • Al menos un número
+                          </li>
+                          <li className={/[^A-Za-z0-9]/.test(formData.password) ? 'text-green-500' : ''}>
+                            • Al menos un carácter especial
+                          </li>
+                        </ul>
                       </div>
-                      {errors.confirmPassword && (
-                        <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
-                      )}
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="confirmPassword" className="text-ispeed-black font-medium">
+                      Confirmar Contraseña *
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showPassword ? "text" : "password"}
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        className={`mt-1 ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                      />
                     </div>
+                    {errors.confirmPassword && (
+                      <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -425,7 +372,7 @@ const RegisterPage = () => {
                   </Button>
                 )}
 
-                {step < 3 ? (
+                {step < 2 ? (
                   <Button 
                     type="button" 
                     onClick={nextStep}
