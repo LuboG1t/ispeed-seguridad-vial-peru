@@ -170,7 +170,7 @@ const LoginPage = () => {
                   onClick={() => navigate("/register")}
                   className="text-ispeed-red hover:underline font-medium"
                 >
-                  Registra tu company
+                  Registra tu empresa
                 </button>
               </p>
             </div>

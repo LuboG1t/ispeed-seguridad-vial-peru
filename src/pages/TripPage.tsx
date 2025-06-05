@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import tripSimulations from "./simulated_trips.json";
 import { City } from "@/dto/city.dto";
 import { getCitiesByCompany } from "@/services/cities.service";
-import { createTrip } from "@/services/trip.service";
+import { createTrip, updateTrip } from "@/services/trip.service";
 
 type AlertRecord = {
   segundo: number;
@@ -36,7 +36,8 @@ const TripPage = () => {
   const [activeAlertMessage, setActiveAlertMessage] = useState("");
   const [selectedTrip, setSelectedTrip] = useState<TripSimulation | null>(null);
   const [tripData, setTripData] = useState({ alerts: 0, responses: 0, duration: 0 });
-  const [availableCities, setAvailableCities] = useState<City[]>([])
+  const [availableCities, setAvailableCities] = useState<City[]>([]);
+  const [tripId, setTripId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -50,6 +51,10 @@ const TripPage = () => {
 
     fetchCities();
   }, []);
+
+  const findCityNameById = (id: string) => {
+    return availableCities.find(available => available.id === id).name;
+  }
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -121,6 +126,8 @@ const TripPage = () => {
       });
   
       console.log("Viaje creado:", newTrip);
+
+      setTripId(newTrip.id);
       setTripStarted(true);
     } catch (error) {
       console.error("Error al crear el viaje:", error);
@@ -132,16 +139,25 @@ const TripPage = () => {
     }
   };
 
-  const endTrip = () => {
-    setTripStarted(false);
-    navigate("/conductor-dashboard");
-  };
-
-  const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  const endTrip = async () => {
+    if (!tripId) return;
+  
+    try {
+      await updateTrip(tripId, {
+        endDate: new Date().toISOString(),
+        status: "FINISHED",
+      });
+  
+      setTripStarted(false);
+      navigate("/conductor-dashboard");
+    } catch (error) {
+      console.error("Error al finalizar el viaje:", error);
+      toast({
+        title: "Error al finalizar el viaje",
+        description: error.response?.data?.message || "Error inesperado",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!tripStarted) {
@@ -193,13 +209,23 @@ const TripPage = () => {
     );
   }
 
+  function formatTime(duration: number): React.ReactNode {
+    const hours = Math.floor(duration / 3600);
+    const minutes = Math.floor((duration % 3600) / 60);
+    const seconds = duration % 60;
+
+    const pad = (num: number) => String(num).padStart(2, "0");
+
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-ispeed-black to-gray-800 text-white">
       <header className="bg-ispeed-black/90 backdrop-blur-sm border-b border-ispeed-red p-4">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div>
             <h1 className="text-xl font-bold">Viaje en Curso</h1>
-            <p className="text-gray-300">{originCity} → {destinationCity}</p>
+            <p className="text-gray-300">{findCityNameById(originCity)} → {findCityNameById(destinationCity)}</p>
           </div>
           <div className="text-right">
             <div className="text-2xl font-mono">{formatTime(tripData.duration)}</div>

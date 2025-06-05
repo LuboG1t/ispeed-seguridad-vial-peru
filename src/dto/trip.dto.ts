@@ -13,6 +13,7 @@ export interface Trip {
     origin: string;
     destination: string;
     companyId: string;
+    status?: "IN_PROGRESS" | "FINISHED";
 }
 
 export interface GetAllTripsDto {
