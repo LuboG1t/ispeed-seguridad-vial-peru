@@ -28,8 +28,8 @@ const App = () => (
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/driver-dashboard" element={<DriverDashboard />} />
-            <Route path="/supervisor-dashboard" element={<SupervisorDashboard />} />
+            <Route path="/conductor-dashboard" element={<DriverDashboard />} />
+            <Route path="/company-dashboard" element={<SupervisorDashboard />} />
             <Route path="/trip" element={<TripPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/configuration" element={<ConfigurationPage />} />

@@ -3,15 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Bus, ChevronLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    companyName: "",
+    name: "",
     ruc: "",
     address: "",
     phone: "",
@@ -23,23 +22,23 @@ const RegisterPage = () => {
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
+
   const navigate = useNavigate();
   const { register } = useAuth();
   const { toast } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when field is edited
     if (errors[name]) {
       setErrors(prev => {
-        const newErrors = {...prev};
+        const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
       });
@@ -48,25 +47,25 @@ const RegisterPage = () => {
 
   const validateStep = (currentStep: number) => {
     const newErrors: Record<string, string> = {};
-    
+
     if (currentStep === 1) {
-      if (!formData.companyName.trim()) newErrors.companyName = "El nombre de la empresa es requerido";
+      if (!formData.name.trim()) newErrors.name = "El nombre de la empresa es requerido";
       if (!formData.ruc.trim()) newErrors.ruc = "El RUC es requerido";
       else if (!/^\d{11}$/.test(formData.ruc)) newErrors.ruc = "El RUC debe tener 11 dígitos";
-      
+
       if (!formData.address.trim()) newErrors.address = "La dirección es requerida";
       if (!formData.phone.trim()) newErrors.phone = "El teléfono es requerido";
     } else if (currentStep === 2) {
       if (!formData.email.trim()) newErrors.email = "El correo electrónico es requerido";
       else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Formato de correo inválido";
-      
+
       if (!formData.password) newErrors.password = "La contraseña es requerida";
       else if (formData.password.length < 8) newErrors.password = "La contraseña debe tener al menos 8 caracteres";
-      
+
       if (!formData.confirmPassword) newErrors.confirmPassword = "Confirme su contraseña";
       else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -84,16 +83,16 @@ const RegisterPage = () => {
   const getPasswordStrength = () => {
     const { password } = formData;
     if (!password) return { strength: 0, label: "" };
-    
+
     let strength = 0;
     if (password.length >= 8) strength += 1;
     if (/[A-Z]/.test(password)) strength += 1;
     if (/[0-9]/.test(password)) strength += 1;
     if (/[^A-Za-z0-9]/.test(password)) strength += 1;
-    
+
     const labels = ["Débil", "Regular", "Buena", "Fuerte", "Excelente"];
-    return { 
-      strength, 
+    return {
+      strength,
       label: labels[strength] || "",
       color: ["red", "orange", "yellow", "green", "green"][strength] || ""
     };
@@ -101,7 +100,7 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateStep(2)) return;
 
     setLoading(true);
@@ -130,11 +129,13 @@ const RegisterPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-ispeed-gray to-white py-12 px-4">
       <div className="max-w-2xl mx-auto mb-16">
         <div className="text-center mb-8">
-          <img 
-            src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png" 
-            alt="iSpeed Logo" 
-            className="h-16 w-auto mx-auto mb-4"
-          />
+          <Link to="/">
+            <img
+              src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png"
+              alt="iSpeed Logo"
+              className="h-16 w-auto mx-auto mb-4"
+            />
+          </Link>
           <h1 className="text-3xl font-bold text-ispeed-black">
             Registrar Empresa
           </h1>
@@ -175,19 +176,19 @@ const RegisterPage = () => {
                 <>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
                     <div>
-                      <Label htmlFor="companyName" className="text-ispeed-black font-medium">
+                      <Label htmlFor="name" className="text-ispeed-black font-medium">
                         Nombre de la Empresa *
                       </Label>
                       <Input
-                        id="companyName"
-                        name="companyName"
-                        value={formData.companyName}
+                        id="name"
+                        name="name"
+                        value={formData.name}
                         onChange={handleChange}
                         placeholder="Transportes ABC S.A.C."
-                        className={`mt-1 ${errors.companyName ? 'border-red-500' : ''}`}
+                        className={`mt-1 ${errors.name ? 'border-red-500' : ''}`}
                       />
-                      {errors.companyName && (
-                        <p className="text-red-500 text-sm mt-1">{errors.companyName}</p>
+                      {errors.name && (
+                        <p className="text-red-500 text-sm mt-1">{errors.name}</p>
                       )}
                     </div>
 
@@ -292,18 +293,17 @@ const RegisterPage = () => {
                     {errors.password && (
                       <p className="text-red-500 text-sm mt-1">{errors.password}</p>
                     )}
-                    
+
                     {formData.password && (
                       <div className="mt-2">
                         <div className="flex items-center">
                           <div className="w-full bg-gray-200 rounded-full h-2.5">
-                            <div 
-                              className={`h-2.5 rounded-full ${
-                                passwordStrength.strength === 0 ? 'bg-red-500' :
+                            <div
+                              className={`h-2.5 rounded-full ${passwordStrength.strength === 0 ? 'bg-red-500' :
                                 passwordStrength.strength === 1 ? 'bg-orange-500' :
-                                passwordStrength.strength === 2 ? 'bg-yellow-500' :
-                                'bg-green-500'
-                              }`}
+                                  passwordStrength.strength === 2 ? 'bg-yellow-500' :
+                                    'bg-green-500'
+                                }`}
                               style={{ width: `${(passwordStrength.strength + 1) * 20}%` }}
                             ></div>
                           </div>
@@ -351,8 +351,8 @@ const RegisterPage = () => {
 
               <div className="flex justify-between mt-8">
                 {step > 1 ? (
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     variant="outline"
                     onClick={prevStep}
                     className="border-ispeed-red text-ispeed-red hover:bg-ispeed-red hover:text-white"
@@ -361,8 +361,8 @@ const RegisterPage = () => {
                     Anterior
                   </Button>
                 ) : (
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     variant="outline"
                     onClick={() => navigate("/")}
                     className="border-gray-300 text-gray-600 hover:bg-gray-100"
@@ -373,16 +373,16 @@ const RegisterPage = () => {
                 )}
 
                 {step < 2 ? (
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     onClick={nextStep}
                     className="bg-ispeed-red hover:bg-red-700 text-white"
                   >
                     Siguiente
                   </Button>
                 ) : (
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="bg-ispeed-red hover:bg-red-700 text-white"
                     disabled={loading}
                   >

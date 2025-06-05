@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,44 +9,114 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, Plus, Trash2, Mail, MapPin, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { createUser, deleteUser, getUsers } from "@/services/user.service";
+import { createCity, getCities } from "@/services/cities.service";
+import { getCompanyById } from "@/services/company.service";
 
 const ConfigurationPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [activeStep, setActiveStep] = useState(1);
-  
+
+  const fetchDrivers = async () => {
+    try {
+      const users = await getUsers();
+      const conductores = users
+        .map(user => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          password: "", // No deberías mostrarla realmente
+          status: user.status ?? "Activo"
+        }));
+
+      setDrivers(conductores);
+    } catch (error) {
+      console.error("Error al cargar conductores:", error);
+      toast({
+        title: "Error al obtener conductores",
+        description: "No se pudo cargar la lista de conductores",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchCities = async () => {
+    try {
+      const cities = await getCities();
+      const ciudades = cities
+        .map(c => ({
+          id: c.id,
+          name: c.name,
+          address: c.address
+        }));
+
+      setCities(ciudades);
+    } catch (error) {
+      console.error("Error al cargar ciudades:", error);
+      toast({
+        title: "Error al obtener ciudades",
+        description: "No se pudo cargar la lista de ciudades",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchCompany = async () => {
+    if (!user?.companyId) return;
+    try {
+      const companyFounded = await getCompanyById(user.companyId);
+
+      setCompanyData({
+        name: companyFounded.name,
+        ruc: companyFounded.ruc,
+        address: companyFounded.address,
+        phone: companyFounded.phone,
+      });
+    } catch (error) {
+      console.error("Error al cargar la empresa:", error);
+      toast({
+        title: "Error al obtener la empresa",
+        description: "No se pudo cargar la data de la empresa",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchDrivers();
+    fetchCities();
+    fetchCompany();
+  }, []);
+
+
   // Datos de la empresa
-  const [companyData, setCompanyData] = useState({
-    name: "Transportes ABC S.A.C.",
-    ruc: "20123456789",
-    address: "Av. Principal 123, Lima",
-    phone: "01-2345678"
-  });
+  const [companyData, setCompanyData] = useState<
+    { name: string, ruc: string, address: string, phone: string }
+  >({ name: "", ruc: "", address: "", phone: "",  });
 
   // Lista de conductores
-  const [drivers, setDrivers] = useState([
-    { id: 1, name: "Juan Pérez", email: "juan@empresa.com", phone: "987654321", status: "Invitado" },
-    { id: 2, name: "María García", email: "maria@empresa.com", phone: "987654322", status: "Activo" }
-  ]);
+  const [drivers, setDrivers] = useState<
+    { id: string; name: string; email: string; password: string; status: string }[]
+  >([]);
 
   // Lista de ciudades/sucursales
-  const [cities, setCities] = useState([
-    { id: 1, name: "Lima", address: "Terminal Terrestre Lima, Av. Javier Prado Este 1056" },
-    { id: 2, name: "Arequipa", address: "Terminal Terrestre Arequipa, Av. Andrés Avelino Cáceres" }
-  ]);
+  const [cities, setCities] = useState<
+    { id: string, name: string, address: string }[]
+  >([]);
 
   // Formularios para nuevos registros
-  const [newDriver, setNewDriver] = useState({ name: "", email: "", phone: "" });
+  const [newDriver, setNewDriver] = useState({ name: "", email: "", password: "" });
   const [newCity, setNewCity] = useState({ name: "", address: "" });
 
-  if (!user || user.role !== 'supervisor') {
+  if (!user || user.role !== 'company') {
     navigate('/login');
     return null;
   }
 
-  const addDriver = () => {
-    if (!newDriver.name || !newDriver.email || !newDriver.phone) {
+  const addDriver = async () => {
+    if (!newDriver.name || !newDriver.email || !newDriver.password) {
       toast({
         title: "Error",
         description: "Completa todos los campos del conductor",
@@ -55,30 +125,62 @@ const ConfigurationPage = () => {
       return;
     }
 
-    const driver = {
-      id: drivers.length + 1,
-      ...newDriver,
-      status: "Pendiente"
-    };
+    try {
+      const newUser = await createUser({
+        name: newDriver.name,
+        email: newDriver.email,
+        password: newDriver.password,
+        role: 'conductor'
+      })
 
-    setDrivers([...drivers, driver]);
-    setNewDriver({ name: "", email: "", phone: "" });
-    
-    toast({
-      title: "Conductor agregado",
-      description: `Se enviará una invitación a ${newDriver.email}`,
-    });
+      setDrivers(prev => [
+        ...prev,
+        {
+          id: newUser.id, // asegúrate de que `createUser` retorne `id`
+          name: newUser.name,
+          email: newUser.email,
+          password: "", // no mostrar la real
+          status: newUser.status ?? "Pendiente"
+        }
+      ]);
+
+      setNewDriver({ name: "", email: "", password: "" });
+
+      toast({
+        title: "Conductor agregado",
+        description: `Se enviará una invitación a ${newDriver.email}`,
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error al crear conductor",
+        description: error.response?.data?.message || "Error inesperado",
+        variant: "destructive",
+      });
+    }
+  }
+
+  const removeDriver = async (id: string) => {
+    try {
+      await deleteUser(id); // llamada real al backend
+
+      setDrivers(prev => prev.filter(driver => driver.id !== id));
+
+      toast({
+        title: "Conductor eliminado",
+        description: "El conductor ha sido eliminado correctamente",
+      });
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: "Error al eliminar conductor",
+        description: error?.response?.data?.message || "No se pudo eliminar el conductor",
+        variant: "destructive",
+      });
+    }
   };
 
-  const removeDriver = (id: number) => {
-    setDrivers(drivers.filter(driver => driver.id !== id));
-    toast({
-      title: "Conductor eliminado",
-      description: "El conductor ha sido removido de la lista",
-    });
-  };
-
-  const addCity = () => {
+  const addCity = async () => {
     if (!newCity.name || !newCity.address) {
       toast({
         title: "Error",
@@ -88,34 +190,43 @@ const ConfigurationPage = () => {
       return;
     }
 
-    const city = {
-      id: cities.length + 1,
-      ...newCity
-    };
+    try {
+      const newCit = await createCity({
+        name: newCity.name,
+        address: newCity.address,
+      });
 
-    setCities([...cities, city]);
-    setNewCity({ name: "", address: "" });
-    
-    toast({
-      title: "Ciudad agregada",
-      description: "La ciudad ha sido agregada correctamente",
-    });
+      setCities(prev => [
+        ...prev,
+        {
+          id: newCit.id,
+          name: newCit.name,
+          address: newCit.address,
+        }
+      ]);
+
+      setNewCity({ name: "", address: "" });
+
+      toast({
+        title: "Ciudad agregada",
+        description: "La ciudad ha sido agregada correctamente",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error al crear ciudad",
+        description: error.response?.data?.message || "Error inesperado",
+        variant: "destructive",
+      });
+    }
   };
 
-  const removeCity = (id: number) => {
+  const removeCity = (id: string) => {
     setCities(cities.filter(city => city.id !== id));
     toast({
       title: "Ciudad eliminada",
       description: "La ciudad ha sido removida de la lista",
     });
-  };
-
-  const finishConfiguration = () => {
-    toast({
-      title: "Configuración completada",
-      description: "Tu empresa está lista para usar iSpeed",
-    });
-    navigate('/supervisor-dashboard');
   };
 
   return (
@@ -125,17 +236,17 @@ const ConfigurationPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Button 
+              <Button
                 variant="ghost"
-                onClick={() => navigate('/supervisor-dashboard')}
+                onClick={() => navigate('/company-dashboard')}
                 className="mr-4"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Volver
               </Button>
-              <img 
-                src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png" 
-                alt="iSpeed Logo" 
+              <img
+                src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png"
+                alt="iSpeed Logo"
                 className="h-10 w-auto mr-4"
               />
               <div>
@@ -156,16 +267,14 @@ const ConfigurationPage = () => {
               { step: 2, title: "Conductores", icon: Users },
               { step: 3, title: "Ciudades", icon: MapPin }
             ].map(({ step, title, icon: Icon }) => (
-              <div 
+              <div
                 key={step}
-                className={`flex items-center space-x-2 cursor-pointer ${
-                  activeStep === step ? "text-ispeed-red" : "text-gray-400"
-                }`}
+                className={`flex items-center space-x-2 cursor-pointer ${activeStep === step ? "text-ispeed-red" : "text-gray-400"
+                  }`}
                 onClick={() => setActiveStep(step)}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  activeStep === step ? "bg-ispeed-red text-white" : "bg-gray-200"
-                }`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeStep === step ? "bg-ispeed-red text-white" : "bg-gray-200"
+                  }`}>
                   {step}
                 </div>
                 <Icon className="w-5 h-5" />
@@ -205,7 +314,7 @@ const ConfigurationPage = () => {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="address">Dirección</Label>
                 <Textarea
@@ -215,7 +324,7 @@ const ConfigurationPage = () => {
                   className="mt-1"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="phone">Teléfono</Label>
                 <Input
@@ -227,7 +336,7 @@ const ConfigurationPage = () => {
               </div>
 
               <div className="flex justify-end">
-                <Button 
+                <Button
                   onClick={() => {
                     toast({
                       title: "Datos guardados",
@@ -277,18 +386,18 @@ const ConfigurationPage = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="driverPhone">Teléfono</Label>
+                    <Label htmlFor="driverPassword">Contraseña</Label>
                     <Input
-                      id="driverPhone"
-                      value={newDriver.phone}
-                      onChange={(e) => setNewDriver(prev => ({ ...prev, phone: e.target.value }))}
+                      id="driverPassword"
+                      value={newDriver.password}
+                      onChange={(e) => setNewDriver(prev => ({ ...prev, password: e.target.value }))}
                       placeholder="987654321"
                       className="mt-1"
                     />
                   </div>
                 </div>
-                
-                <Button 
+
+                <Button
                   onClick={addDriver}
                   className="bg-ispeed-red hover:bg-red-700 text-white"
                 >
@@ -307,20 +416,20 @@ const ConfigurationPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {drivers.map((driver) => (
-                    <div key={driver.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  {drivers.map((driver, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
                         <h3 className="font-semibold text-ispeed-black">{driver.name}</h3>
-                        <p className="text-sm text-gray-600">{driver.email} • {driver.phone}</p>
+                        <p className="text-sm text-gray-600">{driver.email}</p>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <Badge 
+                        <Badge
                           variant={driver.status === "Activo" ? "default" : "secondary"}
                           className={driver.status === "Activo" ? "bg-green-500" : ""}
                         >
                           {driver.status}
                         </Badge>
-                        <Button 
+                        <Button
                           variant="outline"
                           size="sm"
                           onClick={() => removeDriver(driver.id)}
@@ -334,14 +443,14 @@ const ConfigurationPage = () => {
                 </div>
 
                 <div className="flex justify-between mt-6">
-                  <Button 
+                  <Button
                     variant="outline"
                     onClick={() => setActiveStep(1)}
                     className="border-gray-300 text-gray-600"
                   >
                     Anterior
                   </Button>
-                  <Button 
+                  <Button
                     onClick={() => {
                       toast({
                         title: "Conductores guardados",
@@ -391,8 +500,8 @@ const ConfigurationPage = () => {
                     />
                   </div>
                 </div>
-                
-                <Button 
+
+                <Button
                   onClick={addCity}
                   className="bg-ispeed-red hover:bg-red-700 text-white"
                 >
@@ -411,13 +520,13 @@ const ConfigurationPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {cities.map((city) => (
-                    <div key={city.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  {cities.map((city, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
                         <h3 className="font-semibold text-ispeed-black">{city.name}</h3>
                         <p className="text-sm text-gray-600">{city.address}</p>
                       </div>
-                      <Button 
+                      <Button
                         variant="outline"
                         size="sm"
                         onClick={() => removeCity(city.id)}
@@ -430,14 +539,14 @@ const ConfigurationPage = () => {
                 </div>
 
                 <div className="flex justify-between mt-6">
-                  <Button 
+                  <Button
                     variant="outline"
                     onClick={() => setActiveStep(2)}
                     className="border-gray-300 text-gray-600"
                   >
                     Anterior
                   </Button>
-                  <Button 
+                  <Button
                     onClick={() => {
                       toast({
                         title: "Ciudades guardadas",

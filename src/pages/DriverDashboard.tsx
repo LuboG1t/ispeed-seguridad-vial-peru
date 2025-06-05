@@ -15,7 +15,7 @@ const DriverDashboard = () => {
     { id: 3, destination: "Lima - Trujillo", date: "2024-01-13", status: "Completado", score: 78 }
   ]);
 
-  if (!user || user.role !== 'driver') {
+  if (!user || user.role !== 'conductor') {
     navigate('/login');
     return null;
   }

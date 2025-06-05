@@ -1,15 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { BarChart3, Users, MapPin, AlertTriangle, Settings } from "lucide-react";
+import { getDriverCountByCompany } from "@/services/company.service";
 
 const SupervisorDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [isConfigured, setIsConfigured] = useState(true); // Simular empresa ya configurada
+  const [driverCount, setDriverCount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchDriverCount = async () => {
+      if (!user?.companyId) return;
+      try {
+        const count = await getDriverCountByCompany(user.companyId);
+        setDriverCount(count);
+      } catch (error) {
+        console.error("Error al contar conductores", error);
+      }
+    };
+  
+    fetchDriverCount();
+  }, [user]);
+  
 
   // Datos simulados
   const dashboardData = {
@@ -28,7 +45,7 @@ const SupervisorDashboard = () => {
     { id: 4, driver: "Ana Rodríguez", destination: "Arequipa - Cusco", status: "Completado" }
   ];
 
-  if (!user || user.role !== 'supervisor') {
+  if (!user || user.role !== 'company') {
     navigate('/login');
     return null;
   }
@@ -116,7 +133,7 @@ const SupervisorDashboard = () => {
               <Users className="h-4 w-4 text-ispeed-red" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-ispeed-black">{dashboardData.totalDrivers}</div>
+              <div className="text-2xl font-bold text-ispeed-black">{driverCount}</div>
               <p className="text-xs text-gray-600">{dashboardData.activeTrips} en viaje</p>
             </CardContent>
           </Card>

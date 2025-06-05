@@ -86,7 +86,7 @@ const ReportsPage = () => {
             <div className="flex items-center">
               <Button 
                 variant="ghost"
-                onClick={() => navigate(user.role === 'supervisor' ? '/supervisor-dashboard' : '/driver-dashboard')}
+                onClick={() => navigate(user.role === 'company' ? '/company-dashboard' : '/conductor-dashboard')}
                 className="mr-4"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -139,7 +139,7 @@ const ReportsPage = () => {
                 />
               </div>
 
-              {user.role === 'supervisor' && (
+              {user.role === 'company' && (
                 <div>
                   <Label htmlFor="driver">Conductor</Label>
                   <Select value={filters.driver} onValueChange={(value) => setFilters(prev => ({ ...prev, driver: value }))}>
@@ -201,7 +201,7 @@ const ReportsPage = () => {
                 <thead className="bg-gray-50 border-b">
                   <tr>
                     <th className="text-left p-4 font-semibold text-ispeed-black">Fecha</th>
-                    {user.role === 'supervisor' && (
+                    {user.role === 'company' && (
                       <th className="text-left p-4 font-semibold text-ispeed-black">Conductor</th>
                     )}
                     <th className="text-left p-4 font-semibold text-ispeed-black">Destino</th>
@@ -214,7 +214,7 @@ const ReportsPage = () => {
                   {reports.map((report) => (
                     <tr key={report.id} className="border-b hover:bg-gray-50">
                       <td className="p-4 text-gray-900">{report.date}</td>
-                      {user.role === 'supervisor' && (
+                      {user.role === 'company' && (
                         <td className="p-4 text-gray-900">{report.driver}</td>
                       )}
                       <td className="p-4 text-gray-900">{report.destination}</td>

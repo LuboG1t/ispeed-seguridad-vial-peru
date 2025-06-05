@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, ShieldCheck, Truck } from "lucide-react";
@@ -11,10 +11,10 @@ import { Eye, EyeOff, ShieldCheck, Truck } from "lucide-react";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"supervisor" | "driver">("supervisor");
+  const [role, setRole] = useState<"company" | "conductor">("company");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const navigate = useNavigate();
   const { login } = useAuth();
   const { toast } = useToast();
@@ -27,13 +27,13 @@ const LoginPage = () => {
       await login(email, password, role);
       toast({
         title: "Inicio de sesión exitoso",
-        description: `Bienvenido como ${role === 'supervisor' ? 'supervisor' : 'conductor'}`,
+        description: `Bienvenido como ${role === 'company' ? 'company' : 'conductor'}`,
       });
-      
-      if (role === "supervisor") {
-        navigate("/supervisor-dashboard");
+
+      if (role === "company") {
+        navigate("/company-dashboard");
       } else {
-        navigate("/driver-dashboard");
+        navigate("/conductor-dashboard");
       }
     } catch (error) {
       toast({
@@ -50,11 +50,13 @@ const LoginPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-ispeed-gray to-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img 
-            src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png" 
-            alt="iSpeed Logo" 
-            className="h-16 w-auto mx-auto mb-4"
-          />
+          <Link to="/">
+            <img
+              src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png"
+              alt="iSpeed Logo"
+              className="h-16 w-auto mx-auto mb-4"
+            />
+          </Link>
           <h1 className="text-3xl font-bold text-ispeed-black">
             Iniciar Sesión
           </h1>
@@ -76,24 +78,22 @@ const LoginPage = () => {
               <div className="bg-gray-100 p-1 rounded-lg flex items-center justify-center">
                 <button
                   type="button"
-                  onClick={() => setRole("supervisor")}
-                  className={`flex items-center justify-center w-1/2 py-2 px-4 rounded-md transition-all ${
-                    role === "supervisor"
+                  onClick={() => setRole("company")}
+                  className={`flex items-center justify-center w-1/2 py-2 px-4 rounded-md transition-all ${role === "company"
                       ? "bg-ispeed-red text-white shadow-md"
                       : "bg-transparent text-gray-600 hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   <ShieldCheck className="mr-2 h-4 w-4" />
-                  Supervisor
+                  Empresa
                 </button>
                 <button
                   type="button"
-                  onClick={() => setRole("driver")}
-                  className={`flex items-center justify-center w-1/2 py-2 px-4 rounded-md transition-all ${
-                    role === "driver"
+                  onClick={() => setRole("conductor")}
+                  className={`flex items-center justify-center w-1/2 py-2 px-4 rounded-md transition-all ${role === "conductor"
                       ? "bg-ispeed-red text-white shadow-md"
                       : "bg-transparent text-gray-600 hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   <Truck className="mr-2 h-4 w-4" />
                   Conductor
@@ -154,8 +154,8 @@ const LoginPage = () => {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-ispeed-red hover:bg-red-700 text-white py-2 h-11 text-base transition-all hover:shadow-lg"
                 disabled={loading}
               >
@@ -170,7 +170,7 @@ const LoginPage = () => {
                   onClick={() => navigate("/register")}
                   className="text-ispeed-red hover:underline font-medium"
                 >
-                  Registra tu empresa
+                  Registra tu company
                 </button>
               </p>
             </div>

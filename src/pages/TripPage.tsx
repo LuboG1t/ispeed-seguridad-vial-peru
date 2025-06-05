@@ -6,7 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Mic, Square } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import tripSimulations from "./simulated_trips.json";
+import { City } from "@/dto/city.dto";
+import { getCitiesByCompany } from "@/services/cities.service";
+import { createTrip } from "@/services/trip.service";
 
 type AlertRecord = {
   segundo: number;
@@ -24,6 +28,7 @@ type TripSimulation = {
 const TripPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [tripStarted, setTripStarted] = useState(false);
   const [originCity, setOriginCity] = useState("");
   const [destinationCity, setDestinationCity] = useState("");
@@ -31,55 +36,67 @@ const TripPage = () => {
   const [activeAlertMessage, setActiveAlertMessage] = useState("");
   const [selectedTrip, setSelectedTrip] = useState<TripSimulation | null>(null);
   const [tripData, setTripData] = useState({ alerts: 0, responses: 0, duration: 0 });
-
-  const cities = ["Lima", "Arequipa", "Cusco", "Trujillo", "Piura", "Huancayo", "Puno"];
+  const [availableCities, setAvailableCities] = useState<City[]>([])
 
   useEffect(() => {
-  let interval: NodeJS.Timeout;
+    const fetchCities = async () => {
+      try {
+        const cities = await getCitiesByCompany();
+        setAvailableCities(cities);
+      } catch (error) {
+        console.error("Error al obtener ciudades disponibles:", error);
+      }
+    };
 
-  if (tripStarted && selectedTrip) {
-    // Convertir alertas a segundos al iniciar el viaje
-    const alertSchedule = selectedTrip.alertas.map(alert => {
-      const tiempoEnSegundos =
-        alert.segundo !== undefined ? alert.segundo :
-        alert.minuto !== undefined ? alert.minuto * 60 :
-        alert.hora !== undefined ? alert.hora * 3600 : 0;
-      return {
-        ...alert,
-        triggerSecond: tiempoEnSegundos
-      };
-    });
+    fetchCities();
+  }, []);
 
-    interval = setInterval(() => {
-      setTripData(prev => {
-        const newDuration = prev.duration + 1;
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
 
-        const alertToTrigger = alertSchedule.find(a => Math.round(a.triggerSecond) === newDuration);
-        if (alertToTrigger) {
-          setIsAlertActive(true);
-          setActiveAlertMessage(alertToTrigger.mensaje);
-
-          setTimeout(() => {
-            setIsAlertActive(false);
-            setActiveAlertMessage("");
-            setTripData(prev2 => ({
-              ...prev2,
-              responses: prev2.responses + (alertToTrigger.respondida ? 1 : 0)
-            }));
-          }, 2000);
-
-          return { ...prev, alerts: prev.alerts + 1, duration: newDuration };
-        }
-
-        return { ...prev, duration: newDuration };
+    if (tripStarted && selectedTrip) {
+      // Convertir alertas a segundos al iniciar el viaje
+      const alertSchedule = selectedTrip.alertas.map(alert => {
+        const tiempoEnSegundos =
+          alert.segundo !== undefined ? alert.segundo :
+            alert.minuto !== undefined ? alert.minuto * 60 :
+              alert.hora !== undefined ? alert.hora * 3600 : 0;
+        return {
+          ...alert,
+          triggerSecond: tiempoEnSegundos
+        };
       });
-    }, 1000);
-  }
 
-  return () => {
-    if (interval) clearInterval(interval);
-  };
-}, [tripStarted, selectedTrip]);
+      interval = setInterval(() => {
+        setTripData(prev => {
+          const newDuration = prev.duration + 1;
+
+          const alertToTrigger = alertSchedule.find(a => Math.round(a.triggerSecond) === newDuration);
+          if (alertToTrigger) {
+            setIsAlertActive(true);
+            setActiveAlertMessage(alertToTrigger.mensaje);
+
+            setTimeout(() => {
+              setIsAlertActive(false);
+              setActiveAlertMessage("");
+              setTripData(prev2 => ({
+                ...prev2,
+                responses: prev2.responses + (alertToTrigger.respondida ? 1 : 0)
+              }));
+            }, 2000);
+
+            return { ...prev, alerts: prev.alerts + 1, duration: newDuration };
+          }
+
+          return { ...prev, duration: newDuration };
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [tripStarted, selectedTrip]);
 
   useEffect(() => {
     const allTrips = tripSimulations as TripSimulation[];
@@ -87,19 +104,37 @@ const TripPage = () => {
     setSelectedTrip(random);
   }, []);
 
-  if (!user || user.role !== "driver") {
+  if (!user || user.role !== "conductor") {
     navigate("/login");
     return null;
   }
 
-  const startTrip = () => {
-    if (!originCity || !destinationCity) return;
-    setTripStarted(true);
+  const startTrip = async () => {
+    if (!originCity || !destinationCity || originCity === destinationCity) return;
+  
+    try {
+      const newTrip = await createTrip({
+        startDate: new Date().toISOString(),
+        origin: originCity,
+        destination: destinationCity,
+        status: "IN_PROGRESS"
+      });
+  
+      console.log("Viaje creado:", newTrip);
+      setTripStarted(true);
+    } catch (error) {
+      console.error("Error al crear el viaje:", error);
+      toast({
+        title: "Error al crear el viaje",
+        description: error.response?.data?.message || "Error inesperado",
+        variant: "destructive",
+      });
+    }
   };
 
   const endTrip = () => {
     setTripStarted(false);
-    navigate("/driver-dashboard");
+    navigate("/conductor-dashboard");
   };
 
   const formatTime = (seconds: number) => {
@@ -125,8 +160,8 @@ const TripPage = () => {
                   <SelectValue placeholder="Selecciona ciudad de origen" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cities.map(city => (
-                    <SelectItem key={city} value={city}>{city}</SelectItem>
+                  {availableCities.map(city => (
+                    <SelectItem key={city.id} value={city.id}>{city.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -138,17 +173,17 @@ const TripPage = () => {
                   <SelectValue placeholder="Selecciona ciudad de destino" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cities.filter(city => city !== originCity).map(city => (
-                    <SelectItem key={city} value={city}>{city}</SelectItem>
+                  {availableCities.filter(city => city.id !== originCity).map(city => (
+                    <SelectItem key={city.id} value={city.id}>{city.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="flex space-x-3">
-              <Button variant="outline" onClick={() => navigate("/driver-dashboard")} className="flex-1 border-gray-300 text-gray-600 hover:bg-gray-50">
+              <Button variant="outline" onClick={() => navigate("/conductor-dashboard")} className="flex-1 border-gray-300 text-gray-600 hover:bg-gray-50">
                 Cancelar
               </Button>
-              <Button onClick={startTrip} disabled={!originCity || !destinationCity} className="flex-1 bg-ispeed-red hover:bg-red-700 text-white">
+              <Button onClick={startTrip} disabled={!originCity || !destinationCity || originCity === destinationCity} className="flex-1 bg-ispeed-red hover:bg-red-700 text-white">
                 Comenzar Viaje
               </Button>
             </div>
