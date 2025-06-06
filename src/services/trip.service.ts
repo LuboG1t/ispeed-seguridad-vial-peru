@@ -1,4 +1,5 @@
 import apiClient from "@/api/axios";
+import { ReportFilters } from "@/dto/report.dto";
 import { CreateTripDto, GetAllTripsDto, Trip } from "@/dto/trip.dto";
 
 export const createTrip = async (data: CreateTripDto): Promise<Trip> => {
@@ -32,6 +33,29 @@ export const getTripCountByCompanyLastWeek = async (): Promise<number> => {
 
 export const getCountByUser = async (): Promise<number> => {
     const response = await apiClient.get<number>('/trips/count/by-user');
+    return response.data;
+};
+
+export const getDestinationsByCompany = async (id: string): Promise<string[]> => {
+    const response = await apiClient.get<string[]>(`/trips/destinations/by-company/${id}`);
+    // console.log(response);
+    return response.data;
+}
+
+export const searchReports = async (filters: ReportFilters): Promise<Trip[]> => {
+    const params = new URLSearchParams();
+
+    if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
+    if (filters.dateTo) params.append('dateTo', filters.dateTo);
+    if (filters.driver) params.append('driver', filters.driver);
+    if (filters.destination) params.append('destination', filters.destination);
+    if (filters.status) params.append('status', filters.status);
+
+    const response = await apiClient.get<Trip[]>('/trips/search', {
+        params,
+        withCredentials: true
+    });
+
     return response.data;
 };
 

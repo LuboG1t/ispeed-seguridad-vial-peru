@@ -5,10 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { BarChart3, Users, MapPin, AlertTriangle, Settings } from "lucide-react";
-import { getDriverCountByCompany } from "@/services/company.service";
 import { getTripCountByCompanyLastWeek, getTripsByCompany } from "@/services/trip.service";
 import { Trip } from "@/dto/trip.dto";
 import { getCityCountByCompany } from "@/services/cities.service";
+import { getDriverCountByCompany } from "@/services/user.service";
 
 const SupervisorDashboard = () => {
   const navigate = useNavigate();

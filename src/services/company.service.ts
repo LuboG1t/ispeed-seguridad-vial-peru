@@ -16,11 +16,6 @@ export const getCompanyById = async (id: string): Promise<Company> => {
     return response.data;
 };
 
-export const getDriverCountByCompany = async (companyId: string): Promise<number> => {
-    const response = await apiClient.get<number>(`/companies/count-by-company/${companyId}`);
-    return response.data;
-};
-
 export const updateCompany = async (id: string, data: Partial<Company>): Promise<Company> => {
     const response = await apiClient.patch<Company>(`/companies/${id}`, data);
     return response.data;

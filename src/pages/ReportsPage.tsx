@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Search, Filter, Download, ArrowLeft } from "lucide-react";
+import { User } from "@/dto/user.dto";
+import { getDriversByCompany } from "@/services/user.service";
+import { getDestinationsByCompany } from "@/services/trip.service";
+import { searchReports } from "@/services/trip.service";
+import { Report, ReportFilters } from "@/dto/report.dto";
+import { Trip } from "@/dto/trip.dto";
 
 const ReportsPage = () => {
   const navigate = useNavigate();
@@ -20,53 +26,40 @@ const ReportsPage = () => {
     destination: "",
     status: ""
   });
+  const [drivers, setDrivers] = useState<User[]>([]);
+  const [destinations, setDestinations] = useState<string[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
 
-  // Datos simulados de reportes
-  const reports = [
-    {
-      id: 1,
-      driver: "Juan Pérez",
-      destination: "Lima - Arequipa",
-      date: "2024-01-15",
-      duration: "8h 30m",
-      alerts: 12,
-      responses: 11,
-      status: "Completado"
-    },
-    {
-      id: 2,
-      driver: "María García",
-      destination: "Lima - Cusco",
-      date: "2024-01-14",
-      duration: "10h 15m",
-      alerts: 8,
-      responses: 8,
-      status: "Completado"
-    },
-    {
-      id: 3,
-      driver: "Carlos López",
-      destination: "Lima - Trujillo",
-      date: "2024-01-14",
-      duration: "6h 45m",
-      alerts: 15,
-      responses: 12,
-      status: "Completado"
-    },
-    {
-      id: 4,
-      driver: "Ana Rodríguez",
-      destination: "Arequipa - Cusco",
-      date: "2024-01-13",
-      duration: "7h 20m",
-      alerts: 5,
-      responses: 5,
-      status: "Completado"
+  const normalizeFilters = (f: ReportFilters): ReportFilters => ({
+    ...f,
+    driver: f.driver === "all" ? undefined : f.driver,
+    destination: f.destination === "all" ? undefined : f.destination,
+    status: f.status === "all" ? undefined : f.status,
+  });
+
+  const handleSearch = async () => {
+    const results = await searchReports(normalizeFilters(filters));
+    // console.log("Reportes recibidos:", results);
+    setTrips(results);
+  }
+
+  useEffect(() => {
+    if (user?.role === 'company' && user.companyId) {
+      getDriversByCompany(user.companyId).then((drivers) => {
+        // console.log("Conductores recibidos:", drivers);
+        setDrivers(drivers);
+      });
+
+
+      getDestinationsByCompany(user.companyId).then((destination) => {
+        // console.log("Destinos recibidos:", destination
+        setDestinations(destination);
+      });
+
+      handleSearch()
     }
-  ];
+  }, [user]);
 
-  const drivers = ["Juan Pérez", "María García", "Carlos López", "Ana Rodríguez"];
-  const destinations = ["Lima - Arequipa", "Lima - Cusco", "Lima - Trujillo", "Arequipa - Cusco"];
 
   if (!user) {
     navigate('/login');
@@ -77,6 +70,27 @@ const ReportsPage = () => {
     return Math.round((responses / alerts) * 100);
   };
 
+  const calculateDuration = (start: string, end: string) => {
+    if (!start || !end) return "-";
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffMs = endDate.getTime() - startDate.getTime();
+
+    if (isNaN(diffMs) || diffMs < 0) return "-";
+
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else {
+      return `${minutes}m ${seconds}s`;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-ispeed-gray">
       {/* Header */}
@@ -84,7 +98,7 @@ const ReportsPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Button 
+              <Button
                 variant="ghost"
                 onClick={() => navigate(user.role === 'company' ? '/company-dashboard' : '/conductor-dashboard')}
                 className="mr-4"
@@ -92,9 +106,9 @@ const ReportsPage = () => {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Volver
               </Button>
-              <img 
-                src="/logo.png" 
-                alt="iSpeed Logo" 
+              <img
+                src="/logo.png"
+                alt="iSpeed Logo"
                 className="h-10 w-auto mr-4"
               />
               <div>
@@ -149,8 +163,8 @@ const ReportsPage = () => {
                     <SelectContent>
                       <SelectItem value="all">Todos</SelectItem>
                       {drivers.map((driver) => (
-                        <SelectItem key={driver} value={driver}>
-                          {driver}
+                        <SelectItem key={driver.id} value={driver.id}>
+                          {driver.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -176,7 +190,10 @@ const ReportsPage = () => {
               </div>
 
               <div className="flex items-end">
-                <Button className="w-full bg-ispeed-red hover:bg-red-700 text-white">
+                <Button
+                  className="w-full bg-ispeed-red hover:bg-red-700 text-white"
+                  onClick={handleSearch}
+                >
                   <Search className="w-4 h-4 mr-2" />
                   Buscar
                 </Button>
@@ -189,7 +206,7 @@ const ReportsPage = () => {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-2xl font-bold text-ispeed-black">Resultados</h2>
-            <p className="text-gray-600">{reports.length} reportes encontrados</p>
+            <p className="text-gray-600">{trips.length} reportes encontrados</p>
           </div>
         </div>
 
@@ -211,21 +228,21 @@ const ReportsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {reports.map((report) => (
-                    <tr key={report.id} className="border-b hover:bg-gray-50">
-                      <td className="p-4 text-gray-900">{report.date}</td>
+                  {trips.map((trip) => (
+                    <tr key={trip.id} className="border-b hover:bg-gray-50">
+                      <td className="p-4 text-gray-900">{new Date(trip.startDate).toLocaleDateString()}</td>
                       {user.role === 'company' && (
-                        <td className="p-4 text-gray-900">{report.driver}</td>
+                        <td className="p-4 text-gray-900">{trip.user.name}</td>
                       )}
-                      <td className="p-4 text-gray-900">{report.destination}</td>
-                      <td className="p-4 text-gray-900">{report.duration}</td>
-                      <td className="p-4 text-gray-900">{report.alerts}</td>
-                      <td className="p-4">
-                        <span className="text-gray-900">{report.responses}/{report.alerts}</span>
+                      <td className="p-4 text-gray-900">{trip.origin.name} - {trip.destination.name}</td>
+                      <td className="p-4 text-gray-900">{calculateDuration(trip.startDate, trip.endDate)}</td>
+                      {/* <td className="p-4 text-gray-900">{trip.alerts}</td> */}
+                      {/* <td className="p-4">
+                        <span className="text-gray-900">{trip.responses}/{trip.alerts}</span>
                         <span className="text-sm text-gray-500 ml-1">
-                          ({getResponseRate(report.alerts, report.responses)}%)
+                          ({getResponseRate(trip.alerts, trip.responses)}%)
                         </span>
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
