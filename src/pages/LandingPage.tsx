@@ -232,7 +232,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center mb-4">
             <img 
-              src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png" 
+              src="/logo.png" 
               alt="iSpeed Logo" 
               className="h-8 w-auto"
               loading="lazy"

@@ -131,7 +131,7 @@ const RegisterPage = () => {
         <div className="text-center mb-8">
           <Link to="/">
             <img
-              src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png"
+              src="/logo.png"
               alt="iSpeed Logo"
               className="h-16 w-auto mx-auto mb-4"
             />

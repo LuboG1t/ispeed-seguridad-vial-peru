@@ -57,15 +57,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await createCompany(companyData);
 
-      const { access_token } = await loginAuth({
+      const { access_token, user } = await loginAuth({
         email: companyData.email,
         password: companyData.password
       })
 
       localStorage.setItem('token', access_token)
 
-      // setUser(user)
-      console.log('Registrando empresa:', companyData);
+      setUser(user)
+      // console.log('Registrando empresa:', companyData);
     } catch (error) {
       console.error('Error en el registro:', error);
       throw error;

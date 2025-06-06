@@ -11,6 +11,30 @@ export const getTrips = async (): Promise<GetAllTripsDto[]> => {
     return response.data;
 };
 
+export const getTripsByUser = async (): Promise<Trip[]> => {
+    const response = await apiClient.get<Trip[]>('/trips/by-user', {
+        withCredentials: true,
+    });
+    return response.data;
+};
+
+export const getTripsByCompany = async (): Promise<Trip[]> => {
+    const response = await apiClient.get<Trip[]>('/trips/by-company', {
+        withCredentials: true,
+    });
+    return response.data;
+};
+
+export const getTripCountByCompanyLastWeek = async (): Promise<number> => {
+    const response = await apiClient.get<number>('/trips/count/company/last-week');
+    return response.data;
+};
+
+export const getCountByUser = async (): Promise<number> => {
+    const response = await apiClient.get<number>('/trips/count/by-user');
+    return response.data;
+};
+
 export const getTripById = async (id: string): Promise<Trip> => {
     const response = await apiClient.get<Trip>(`/trips/${id}`);
     return response.data;

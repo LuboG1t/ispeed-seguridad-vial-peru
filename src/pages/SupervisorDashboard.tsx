@@ -6,12 +6,18 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { BarChart3, Users, MapPin, AlertTriangle, Settings } from "lucide-react";
 import { getDriverCountByCompany } from "@/services/company.service";
+import { getTripCountByCompanyLastWeek, getTripsByCompany } from "@/services/trip.service";
+import { Trip } from "@/dto/trip.dto";
+import { getCityCountByCompany } from "@/services/cities.service";
 
 const SupervisorDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [isConfigured, setIsConfigured] = useState(true); // Simular empresa ya configurada
   const [driverCount, setDriverCount] = useState<number>(0);
+  const [cityCount, setCityCount] = useState<number>(0);
+  const [tripsInLastWeek, setTripsInLastWeek] = useState<number>(0);
+  const [myTrips, setMyTrips] = useState<Trip[]>([]);
 
   useEffect(() => {
     const fetchDriverCount = async () => {
@@ -23,10 +29,43 @@ const SupervisorDashboard = () => {
         console.error("Error al contar conductores", error);
       }
     };
-  
+
+    const fetchCityCount = async () => {
+      try {
+        const count = await getCityCountByCompany();
+        setCityCount(count);
+      } catch (error) {
+        console.error("Error al obtener número de ciudades:", error);
+      }
+    };
+    
+    const fetchTripsInLastWeek = async () => {
+      try {
+        const count = await getTripCountByCompanyLastWeek();
+        setTripsInLastWeek(count);
+      } catch (error) {
+        console.error("Error al obtener número de viajes de la semana:", error);
+      }
+    };
+
     fetchDriverCount();
+    fetchTripsInLastWeek();
+    fetchCityCount();
   }, [user]);
-  
+
+  useEffect(() => {
+    const fetchCompanyTrips = async () => {
+      try {
+        const trips = await getTripsByCompany();
+        // console.log("Viajes de la empresa:", trips);
+        setMyTrips(trips);
+      } catch (error) {
+        console.error("Error al obtener los viajes de la empresa:", error);
+      }
+    };
+
+    fetchCompanyTrips();
+  }, []);
 
   // Datos simulados
   const dashboardData = {
@@ -38,13 +77,6 @@ const SupervisorDashboard = () => {
     responseRate: 94
   };
 
-  const recentTrips = [
-    { id: 1, driver: "Juan Pérez", destination: "Lima - Arequipa", status: "En curso" },
-    { id: 2, driver: "María García", destination: "Lima - Cusco", status: "Completado" },
-    { id: 3, driver: "Carlos López", destination: "Lima - Trujillo", status: "Completado" },
-    { id: 4, driver: "Ana Rodríguez", destination: "Arequipa - Cusco", status: "Completado" }
-  ];
-
   if (!user || user.role !== 'company') {
     navigate('/login');
     return null;
@@ -55,9 +87,9 @@ const SupervisorDashboard = () => {
       <div className="min-h-screen bg-ispeed-gray flex items-center justify-center p-4">
         <Card className="w-full max-w-md border-2 border-ispeed-red">
           <CardHeader className="text-center">
-            <img 
-              src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png" 
-              alt="iSpeed Logo" 
+            <img
+              src="/logo.png"
+              alt="iSpeed Logo"
               className="h-12 w-auto mx-auto mb-4"
             />
             <CardTitle className="text-2xl text-ispeed-black">Configuración Inicial</CardTitle>
@@ -66,7 +98,7 @@ const SupervisorDashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
+            <Button
               onClick={() => navigate('/configuration')}
               className="w-full bg-ispeed-red hover:bg-red-700 text-white"
             >
@@ -85,9 +117,9 @@ const SupervisorDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <img 
-                src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png" 
-                alt="iSpeed Logo" 
+              <img
+                src="/logo.png"
+                alt="iSpeed Logo"
                 className="h-10 w-auto mr-4"
               />
               <div>
@@ -95,16 +127,16 @@ const SupervisorDashboard = () => {
                 <p className="text-sm text-gray-600">Bienvenido, {user.name}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => navigate('/reports')}
                 className="border-ispeed-red text-ispeed-red hover:bg-ispeed-red hover:text-white"
               >
                 Ver Reportes
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => navigate('/configuration')}
                 className="border-gray-300 text-gray-600 hover:bg-gray-100"
@@ -112,7 +144,7 @@ const SupervisorDashboard = () => {
                 <Settings className="w-4 h-4 mr-2" />
                 Configuración
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 onClick={logout}
                 className="text-gray-600 hover:text-ispeed-red"
@@ -134,7 +166,7 @@ const SupervisorDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-ispeed-black">{driverCount}</div>
-              <p className="text-xs text-gray-600">{dashboardData.activeTrips} en viaje</p>
+              <p className="text-xs text-gray-600">Algunos en viaje</p>
             </CardContent>
           </Card>
 
@@ -144,7 +176,7 @@ const SupervisorDashboard = () => {
               <BarChart3 className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-ispeed-black">{dashboardData.weeklyTrips}</div>
+              <div className="text-2xl font-bold text-ispeed-black">{tripsInLastWeek}</div>
               <p className="text-xs text-green-600">+12% vs semana anterior</p>
             </CardContent>
           </Card>
@@ -155,7 +187,7 @@ const SupervisorDashboard = () => {
               <MapPin className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-ispeed-black">{dashboardData.totalDestinations}</div>
+              <div className="text-2xl font-bold text-ispeed-black">{cityCount}</div>
               <p className="text-xs text-gray-600">Rutas configuradas</p>
             </CardContent>
           </Card>
@@ -182,16 +214,16 @@ const SupervisorDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentTrips.map((trip) => (
+              {myTrips.map((trip) => (
                 <div key={trip.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h3 className="font-semibold text-ispeed-black">{trip.driver}</h3>
-                    <p className="text-sm text-gray-600">{trip.destination}</p>
+                    <h3 className="font-semibold text-ispeed-black">{trip.user.name ?? "Conductor desconocido"}</h3>
+                    <p className="text-sm text-gray-600">{trip.origin.name ?? "?"} → {trip.destination.name ?? "?"}</p>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Badge 
-                      variant={trip.status === "En curso" ? "default" : "secondary"}
-                      className={trip.status === "En curso" ? "bg-ispeed-red" : ""}
+                    <Badge
+                      variant={trip.status === "IN_PROGRESS" ? "default" : "secondary"}
+                      className={trip.status === "IN_PROGRESS" ? "bg-ispeed-red" : ""}
                     >
                       {trip.status}
                     </Badge>
@@ -199,9 +231,9 @@ const SupervisorDashboard = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-6 text-center">
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => navigate('/reports')}
                 className="border-ispeed-red text-ispeed-red hover:bg-ispeed-red hover:text-white"

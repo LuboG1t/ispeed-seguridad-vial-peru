@@ -94,7 +94,7 @@ const ConfigurationPage = () => {
   // Datos de la empresa
   const [companyData, setCompanyData] = useState<
     { name: string, ruc: string, address: string, phone: string }
-  >({ name: "", ruc: "", address: "", phone: "",  });
+  >({ name: "", ruc: "", address: "", phone: "", });
 
   // Lista de conductores
   const [drivers, setDrivers] = useState<
@@ -245,7 +245,7 @@ const ConfigurationPage = () => {
                 Volver
               </Button>
               <img
-                src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png"
+                src="/logo.png"
                 alt="iSpeed Logo"
                 className="h-10 w-auto mr-4"
               />

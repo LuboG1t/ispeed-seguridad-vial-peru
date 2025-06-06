@@ -93,7 +93,7 @@ const ReportsPage = () => {
                 Volver
               </Button>
               <img 
-                src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png" 
+                src="/logo.png" 
                 alt="iSpeed Logo" 
                 className="h-10 w-auto mr-4"
               />

@@ -1,19 +1,53 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { getCountByUser, getTripsByUser } from "@/services/trip.service";
+import { useToast } from "@/hooks/use-toast";
+import { Trip } from "@/dto/trip.dto";
 
 const DriverDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [recentTrips] = useState([
-    { id: 1, destination: "Lima - Arequipa", date: "2024-01-15", status: "Completado", score: 85 },
-    { id: 2, destination: "Lima - Cusco", date: "2024-01-14", status: "Completado", score: 92 },
-    { id: 3, destination: "Lima - Trujillo", date: "2024-01-13", status: "Completado", score: 78 }
-  ]);
+  const { toast } = useToast();
+  const [totalTrips, setTotalTrips] = useState<number>(0);
+  const [myTrips, setMyTrips] = useState<Trip[]>([]);
+
+  const fetchRecentlyTrips = async () => {
+    try {
+      const trips = await getTripsByUser();
+      setMyTrips(trips);
+    } catch (error) {
+      console.error("Error al obtener viajes del usuario:", error);
+      toast({
+        title: "Error al obtener viajes",
+        description: error.response?.data?.message || "Error inesperado",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchNumberTrips = async () => {
+    try {
+      const trips = await getCountByUser();
+      setTotalTrips(trips);
+    } catch (error) {
+      console.error("Error al obtener viajes del usuario:", error);
+      toast({
+        title: "Error al obtener viajes",
+        description: error.response?.data?.message || "Error inesperado",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchNumberTrips();
+    fetchRecentlyTrips();
+  }, []);
 
   if (!user || user.role !== 'conductor') {
     navigate('/login');
@@ -27,9 +61,9 @@ const DriverDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <img 
-                src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png" 
-                alt="iSpeed Logo" 
+              <img
+                src="/logo.png"
+                alt="iSpeed Logo"
                 className="h-10 w-auto mr-4"
               />
               <div>
@@ -37,16 +71,16 @@ const DriverDashboard = () => {
                 <p className="text-sm text-gray-600">Bienvenido, {user.name}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => navigate('/reports')}
                 className="border-ispeed-red text-ispeed-red hover:bg-ispeed-red hover:text-white"
               >
                 Ver Reportes
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 onClick={logout}
                 className="text-gray-600 hover:text-ispeed-red"
@@ -69,7 +103,7 @@ const DriverDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Button 
+              <Button
                 size="lg"
                 onClick={() => navigate('/trip')}
                 className="bg-white text-ispeed-red hover:bg-gray-100 px-8 py-4 text-xl font-semibold"
@@ -87,7 +121,7 @@ const DriverDashboard = () => {
               <CardTitle className="text-lg text-ispeed-black">Viajes Totales</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-ispeed-red">47</div>
+              <div className="text-3xl font-bold text-ispeed-red">{totalTrips}</div>
               <p className="text-sm text-gray-600">Este mes</p>
             </CardContent>
           </Card>
@@ -123,11 +157,11 @@ const DriverDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentTrips.map((trip) => (
+              {myTrips.slice(0, 3).map((trip) => (
                 <div key={trip.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h3 className="font-semibold text-ispeed-black">{trip.destination}</h3>
-                    <p className="text-sm text-gray-600">{trip.date}</p>
+                    <h3 className="font-semibold text-ispeed-black">{trip.origin.name} → {trip.destination.name}</h3>
+                    <p className="text-sm text-gray-600">{new Date(trip.startDate).toLocaleDateString()}</p>
                   </div>
                   <div>
                     <Badge variant="secondary">{trip.status}</Badge>
@@ -135,9 +169,9 @@ const DriverDashboard = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-6 text-center">
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => navigate('/reports')}
                 className="border-ispeed-red text-ispeed-red hover:bg-ispeed-red hover:text-white"

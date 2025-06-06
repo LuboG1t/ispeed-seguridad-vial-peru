@@ -11,6 +11,7 @@ import tripSimulations from "./simulated_trips.json";
 import { City } from "@/dto/city.dto";
 import { getCitiesByCompany } from "@/services/cities.service";
 import { createTrip, updateTrip } from "@/services/trip.service";
+import { createDetail } from "@/services/details.service";
 
 type AlertRecord = {
   segundo: number;
@@ -116,7 +117,7 @@ const TripPage = () => {
 
   const startTrip = async () => {
     if (!originCity || !destinationCity || originCity === destinationCity) return;
-  
+
     try {
       const newTrip = await createTrip({
         startDate: new Date().toISOString(),
@@ -124,8 +125,8 @@ const TripPage = () => {
         destination: destinationCity,
         status: "IN_PROGRESS"
       });
-  
-      console.log("Viaje creado:", newTrip);
+
+      // console.log("Viaje creado:", newTrip);
 
       setTripId(newTrip.id);
       setTripStarted(true);
@@ -141,13 +142,15 @@ const TripPage = () => {
 
   const endTrip = async () => {
     if (!tripId) return;
-  
+
     try {
+      await createDetail(tripId, selectedTrip.alertas);
+
       await updateTrip(tripId, {
         endDate: new Date().toISOString(),
         status: "FINISHED",
       });
-  
+
       setTripStarted(false);
       navigate("/conductor-dashboard");
     } catch (error) {
@@ -165,7 +168,7 @@ const TripPage = () => {
       <div className="min-h-screen bg-ispeed-gray flex items-center justify-center p-4">
         <Card className="w-full max-w-md border-2 border-gray-100">
           <CardHeader className="text-center">
-            <img src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png" alt="iSpeed Logo" className="h-12 w-auto mx-auto mb-4" />
+            <img src="/logo.png" alt="iSpeed Logo" className="h-12 w-auto mx-auto mb-4" />
             <CardTitle className="text-2xl text-ispeed-black">Iniciar Nuevo Viaje</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">

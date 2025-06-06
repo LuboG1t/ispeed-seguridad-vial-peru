@@ -18,7 +18,6 @@ export const getCompanyById = async (id: string): Promise<Company> => {
 
 export const getDriverCountByCompany = async (companyId: string): Promise<number> => {
     const response = await apiClient.get<number>(`/companies/count-by-company/${companyId}`);
-    console.log('number of drivers', response.data);
     return response.data;
 };
 

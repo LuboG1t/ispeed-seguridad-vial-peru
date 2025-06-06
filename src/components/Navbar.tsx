@@ -11,7 +11,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
             <img 
-              src="/lovable-uploads/9baf5382-54f1-43c5-b500-c287567327f9.png" 
+              src="/logo.png" 
               alt="iSpeed Logo" 
               className="h-10 w-auto"
             />
